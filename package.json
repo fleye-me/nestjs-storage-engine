@@ -1,7 +1,11 @@
 {
-  "name": "nest-image-resizer",
+  "name": "@sthima/nest-image-resizer",
   "version": "0.0.1",
   "main": "dist/index.js",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": "git://github.com/sthima/nestjs-image-resizer-upload.git",
   "scripts": {
     "build": "tsc -p tsconfig.lib.json"
   },
