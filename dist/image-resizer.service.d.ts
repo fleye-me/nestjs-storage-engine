@@ -9,5 +9,5 @@ export declare class ImageResizerService {
         height: number;
     }): Promise<any>;
     sendToGCS(buffer: any, filename: string, mimetype: string): Promise<{}>;
-    upload(res: any, file: any): Promise<void>;
+    upload(file: any): Promise<{}>;
 }

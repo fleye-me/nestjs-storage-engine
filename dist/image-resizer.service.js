@@ -66,7 +66,7 @@ let ImageResizerService = class ImageResizerService {
             }));
         });
     }
-    upload(res, file) {
+    upload(file) {
         return __awaiter(this, void 0, void 0, function* () {
             const sizes = [50, 100, 200, 500];
             const pendingUploads = [];
@@ -81,7 +81,7 @@ let ImageResizerService = class ImageResizerService {
                 });
             }
             yield Promise.all(pendingUploads);
-            res.end(JSON.stringify(imagesUrls));
+            return imagesUrls;
         });
     }
 };
