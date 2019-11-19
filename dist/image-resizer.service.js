@@ -66,15 +66,16 @@ let ImageResizerService = class ImageResizerService {
             }));
         });
     }
-    upload(file) {
+    upload(file, { path, filename, sizes }) {
         return __awaiter(this, void 0, void 0, function* () {
-            const sizes = [50, 100, 200, 500];
             const pendingUploads = [];
             const imagesUrls = {};
-            pendingUploads.push(this.sendToGCS(file.buffer, file.originalname, file.mimetype).then(url => imagesUrls['original'] = url));
+            sizes = sizes ? sizes : [];
+            filename = filename ? filename : file.originalname;
+            pendingUploads.push(this.sendToGCS(file.buffer, filename, file.mimetype).then(url => imagesUrls['original'] = url));
             for (const size of sizes) {
-                this.resize(file.buffer, { width: size, height: size }).then(smallImage => {
-                    pendingUploads.push(this.sendToGCS(smallImage, `${size}_${size}_${file.originalname}`, file.mimetype).then(url => imagesUrls[size] = url));
+                this.resize(file.buffer, size).then(resizedImage => {
+                    pendingUploads.push(this.sendToGCS(resizedImage, `${path ? `${path}/` : ''}${size.width}_${size.height}_${filename}`, file.mimetype).then(url => imagesUrls[size] = url));
                 }).catch(err => {
                     console.error('Resize image error');
                     console.error(err);

@@ -55,27 +55,29 @@ export class ImageResizerService {
     });
   }
 
-  async upload(file: any) {
-    const sizes = [50, 100, 200, 500];
+  async upload(file: any, {path, filename, sizes}) {
     const pendingUploads = [];
     const imagesUrls = {};
 
+    sizes = sizes ? sizes : [];
+    filename = filename ? filename : file.originalname;
     // Upload original image
     pendingUploads.push(this.sendToGCS(
       file.buffer,
-      file.originalname,
+      filename,
       file.mimetype
     ).then(url => imagesUrls['original'] = url));
+
 
     // Upload small images
     for (const size of sizes) {
       this.resize(
         file.buffer,
-        { width: size, height: size }
-      ).then(smallImage => {
+        size
+      ).then(resizedImage => {
         pendingUploads.push(this.sendToGCS(
-          smallImage,
-          `${size}_${size}_${file.originalname}`,
+          resizedImage,
+          `${path ? `${path}/` : ''}${size.width}_${size.height}_${filename}`,
           file.mimetype
         ).then(url => imagesUrls[size] = url));
       }).catch(err => {
