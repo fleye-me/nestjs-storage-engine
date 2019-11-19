@@ -4,4 +4,4 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./image-resizer.module"));
-__export(require("./image-resizer.module"));
+__export(require("./image-resizer.service"));
