@@ -65,8 +65,8 @@ export class ImageResizerService {
     // Upload original image
     pendingUploads.push(this.sendToGCS(
       file.buffer,
-      filename,
-      file.mimetype
+      `${path ? `${path}/` : ''}${filename}`,
+      file.mimetype,
     ).then(url => imagesUrls['original'] = url));
 
 

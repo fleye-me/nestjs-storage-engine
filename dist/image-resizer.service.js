@@ -72,7 +72,7 @@ let ImageResizerService = class ImageResizerService {
             const imagesUrls = {};
             sizes = sizes ? sizes : [];
             filename = filename ? filename : file.originalname;
-            pendingUploads.push(this.sendToGCS(file.buffer, filename, file.mimetype).then(url => imagesUrls['original'] = url));
+            pendingUploads.push(this.sendToGCS(file.buffer, `${path ? `${path}/` : ''}${filename}`, file.mimetype).then(url => imagesUrls['original'] = url));
             for (const size of sizes) {
                 this.resize(file.buffer, size).then(resizedImage => {
                     pendingUploads.push(this.sendToGCS(resizedImage, `${path ? `${path}/` : ''}${size.width}_${size.height}_${filename}`, file.mimetype).then(url => imagesUrls[`${size.width || size.height}x${size.height || size.width}`] = url));
