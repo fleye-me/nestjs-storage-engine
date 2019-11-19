@@ -1,7 +1,8 @@
 import { GOOGLE_CLOUD_CONFIG } from './image-resizer.constants';
 import { GoogleCloudConfig } from './interfaces/google-cloud.interface';
+import { IUploadOptions } from './interfaces/uploadOptions.interface';
 
-import { Injectable, Inject, UploadedFile } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { Storage } from '@google-cloud/storage';
 import * as sharp from 'sharp';
 
@@ -21,7 +22,7 @@ export class ImageResizerService {
     return 'Hello World!';
   }
 
-  async resize(buffer, options = { width: 50, height: 50 }) {
+  async resize(buffer, options: {width?: number, height?: number} = { width: 50, height: 50 }) {
     return sharp(buffer).resize(options.width, options.height).toBuffer();
   }
 
@@ -29,7 +30,7 @@ export class ImageResizerService {
   async sendToGCS(buffer: any, filename: string, mimetype: string) {
     return new Promise(async (resolve, reject) => {
       try {
-        const _filename = `${Date.now()}${filename}`
+        const _filename = `${filename}`
         const bucket = await this.storage.bucket(this.googleCloudConfig.bucket);
         const remoteFile = bucket.file(_filename);
 
@@ -55,7 +56,7 @@ export class ImageResizerService {
     });
   }
 
-  async upload(file: any, {path, filename, sizes}) {
+  async upload(file: any, {path, filename, sizes}: IUploadOptions) {
     const pendingUploads = [];
     const imagesUrls = {};
 
@@ -79,7 +80,7 @@ export class ImageResizerService {
           resizedImage,
           `${path ? `${path}/` : ''}${size.width}_${size.height}_${filename}`,
           file.mimetype
-        ).then(url => imagesUrls[size] = url));
+        ).then(url => imagesUrls[`${size.width || size.height}x${size.height || size.width}`] = url));
       }).catch(err => {
         console.error('Resize image error');
         console.error(err);

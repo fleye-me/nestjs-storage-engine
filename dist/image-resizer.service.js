@@ -44,7 +44,7 @@ let ImageResizerService = class ImageResizerService {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
                 try {
-                    const _filename = `${Date.now()}${filename}`;
+                    const _filename = `${filename}`;
                     const bucket = yield this.storage.bucket(this.googleCloudConfig.bucket);
                     const remoteFile = bucket.file(_filename);
                     const stream = remoteFile.createWriteStream({
@@ -75,7 +75,7 @@ let ImageResizerService = class ImageResizerService {
             pendingUploads.push(this.sendToGCS(file.buffer, filename, file.mimetype).then(url => imagesUrls['original'] = url));
             for (const size of sizes) {
                 this.resize(file.buffer, size).then(resizedImage => {
-                    pendingUploads.push(this.sendToGCS(resizedImage, `${path ? `${path}/` : ''}${size.width}_${size.height}_${filename}`, file.mimetype).then(url => imagesUrls[size] = url));
+                    pendingUploads.push(this.sendToGCS(resizedImage, `${path ? `${path}/` : ''}${size.width}_${size.height}_${filename}`, file.mimetype).then(url => imagesUrls[`${size.width || size.height}x${size.height || size.width}`] = url));
                 }).catch(err => {
                     console.error('Resize image error');
                     console.error(err);
