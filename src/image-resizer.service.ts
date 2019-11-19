@@ -55,7 +55,7 @@ export class ImageResizerService {
     });
   }
 
-  async upload(res: any, file: any) {
+  async upload(file: any) {
     const sizes = [50, 100, 200, 500];
     const pendingUploads = [];
     const imagesUrls = {};
@@ -85,7 +85,7 @@ export class ImageResizerService {
     }
 
     await Promise.all(pendingUploads);
-    res.end(JSON.stringify(imagesUrls));
+    return imagesUrls;
   }
 
 }
