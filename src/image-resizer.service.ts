@@ -56,6 +56,13 @@ export class ImageResizerService {
     });
   }
 
+  async removeFromGCS(filename: string) {
+    return this.storage
+      .bucket(this.googleCloudConfig.bucket)
+      .file(filename)
+      .delete()
+  }
+
   async upload(file: any, {path, filename, sizes}: IUploadOptions) {
     const pendingUploads = [];
     const imagesUrls = {};
