@@ -27,9 +27,11 @@ YOUR_GOOGLE_CLOUD_CREDENTIALS = path to your google service account file that gi
     }),
   ],
 })
-
+```
 
 ## Using the service
+```javascript
+
 import { ImageResizerService } from 'nest-image-resizer';
 
 export class YourService {
