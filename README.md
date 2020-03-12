@@ -35,5 +35,5 @@ import { ImageResizerService } from 'nest-image-resizer';
 export class YourService {
   constructor(
     private readonly imageResizerService: ImageResizerService,
-  ) {}n
+  ) {}
 ```
