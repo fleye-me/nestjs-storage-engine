@@ -36,4 +36,5 @@ export class YourService {
   constructor(
     private readonly imageResizerService: ImageResizerService,
   ) {}
+}
 ```
