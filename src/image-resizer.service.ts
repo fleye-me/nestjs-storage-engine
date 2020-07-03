@@ -12,10 +12,16 @@ export class ImageResizerService {
   constructor(
     @Inject(GOOGLE_CLOUD_CONFIG) private readonly googleCloudConfig: GoogleCloudConfig,
   ) {
-    this.storage = new Storage({
-      projectId: this.googleCloudConfig.projectId,
-      keyFilename: this.googleCloudConfig.keyFilename,
-    })
+
+    if (this.googleCloudConfig.keyFilename) {
+      this.storage = new Storage({
+        projectId: this.googleCloudConfig.projectId,
+        keyFilename: this.googleCloudConfig.keyFilename,
+      });
+    } else {
+      this.storage = new Storage();
+    }
+  
   }
 
   getHello(): string {

@@ -27,10 +27,15 @@ const sharp = require("sharp");
 let ImageResizerService = class ImageResizerService {
     constructor(googleCloudConfig) {
         this.googleCloudConfig = googleCloudConfig;
-        this.storage = new storage_1.Storage({
-            projectId: this.googleCloudConfig.projectId,
-            keyFilename: this.googleCloudConfig.keyFilename,
-        });
+        if (this.googleCloudConfig.keyFilename) {
+            this.storage = new storage_1.Storage({
+                projectId: this.googleCloudConfig.projectId,
+                keyFilename: this.googleCloudConfig.keyFilename,
+            });
+        }
+        else {
+            this.storage = new storage_1.Storage();
+        }
     }
     getHello() {
         return 'Hello World!';
@@ -64,6 +69,14 @@ let ImageResizerService = class ImageResizerService {
                     console.error(err);
                 }
             }));
+        });
+    }
+    removeFromGCS(filename) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.storage
+                .bucket(this.googleCloudConfig.bucket)
+                .file(filename)
+                .delete();
         });
     }
     upload(file, { path, filename, sizes }) {
