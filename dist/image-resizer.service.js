@@ -12,14 +12,16 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ImageResizerService = void 0;
 const image_resizer_constants_1 = require("./image-resizer.constants");
 const common_1 = require("@nestjs/common");
 const storage_1 = require("@google-cloud/storage");
@@ -37,24 +39,21 @@ let ImageResizerService = class ImageResizerService {
             this.storage = new storage_1.Storage();
         }
     }
-    getHello() {
-        return 'Hello World!';
-    }
-    resize(buffer, options = { width: 50, height: 50 }) {
+    resizeImage(buffer, options) {
         return __awaiter(this, void 0, void 0, function* () {
             return sharp(buffer).resize(options.width, options.height).toBuffer();
         });
     }
-    sendToGCS(buffer, filename, mimetype) {
+    sendToGCS({ buffer, filename, mimetype, path, }) {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
                 try {
-                    const _filename = `${filename}`;
-                    const bucket = yield this.storage.bucket(this.googleCloudConfig.bucket);
+                    const _filename = path ? `${path}/${filename}` : filename;
+                    const bucket = this.storage.bucket(this.googleCloudConfig.bucket);
                     const remoteFile = bucket.file(_filename);
                     const stream = remoteFile.createWriteStream({
-                        metadata: { contentType: mimetype },
-                        resumable: false
+                        metadata: mimetype ? { contentType: mimetype } : undefined,
+                        resumable: false,
                     });
                     stream.on('error', reject);
                     stream.on('finish', () => __awaiter(this, void 0, void 0, function* () {
@@ -71,28 +70,29 @@ let ImageResizerService = class ImageResizerService {
             }));
         });
     }
-    removeFromGCS(filename) {
+    removeFileFromGCS({ filename, path }) {
         return __awaiter(this, void 0, void 0, function* () {
+            const _filename = path ? `${path}/${filename}` : filename;
             return this.storage
                 .bucket(this.googleCloudConfig.bucket)
-                .file(filename)
+                .file(_filename)
                 .delete();
         });
     }
-    upload(file, { path, filename, sizes }) {
+    resizeImageAndUpload(file, sizes = []) {
         return __awaiter(this, void 0, void 0, function* () {
             const pendingUploads = [];
             const imagesUrls = {};
-            sizes = sizes ? sizes : [];
-            filename = filename ? filename : file.originalname;
-            pendingUploads.push(this.sendToGCS(file.buffer, `${path ? `${path}/` : ''}${filename}`, file.mimetype).then(url => imagesUrls['original'] = url));
+            pendingUploads.push(this.sendToGCS(file).then((url) => (imagesUrls['original'] = url)));
             for (const size of sizes) {
-                this.resize(file.buffer, size).then(resizedImage => {
-                    pendingUploads.push(this.sendToGCS(resizedImage, `${path ? `${path}/` : ''}${size.width}_${size.height}_${filename}`, file.mimetype).then(url => imagesUrls[`${size.width || size.height}x${size.height || size.width}`] = url));
-                }).catch(err => {
+                try {
+                    const resizedImage = yield this.resizeImage(file.buffer, size);
+                    pendingUploads.push(this.sendToGCS(Object.assign(Object.assign({}, file), { buffer: resizedImage, filename: `${size.width}_${size.height}_${file.filename}` })).then((url) => (imagesUrls[`w${size.width}h${size.height}`] = url)));
+                }
+                catch (err) {
                     console.error('Resize image error');
                     console.error(err);
-                });
+                }
             }
             yield Promise.all(pendingUploads);
             return imagesUrls;
@@ -100,8 +100,8 @@ let ImageResizerService = class ImageResizerService {
     }
 };
 ImageResizerService = __decorate([
-    common_1.Injectable(),
-    __param(0, common_1.Inject(image_resizer_constants_1.GOOGLE_CLOUD_CONFIG)),
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Inject)(image_resizer_constants_1.GOOGLE_CLOUD_CONFIG)),
     __metadata("design:paramtypes", [Object])
 ], ImageResizerService);
 exports.ImageResizerService = ImageResizerService;

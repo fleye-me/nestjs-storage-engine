@@ -1,15 +1,14 @@
+/// <reference types="node" />
 import { GoogleCloudConfig } from './interfaces/google-cloud.interface';
-import { IUploadOptions } from './interfaces/uploadOptions.interface';
+import { SizeOptionsDto } from './interfaces/sizeOptions.dto';
+import { FileOptionsDto } from './interfaces/fileOptions.dto';
+import { RemoveFileOptionsDto } from './interfaces/removeFileOptions.dto';
 export declare class ImageResizerService {
     private readonly googleCloudConfig;
     private storage;
     constructor(googleCloudConfig: GoogleCloudConfig);
-    getHello(): string;
-    resize(buffer: any, options?: {
-        width?: number;
-        height?: number;
-    }): Promise<any>;
-    sendToGCS(buffer: any, filename: string, mimetype: string): Promise<{}>;
-    removeFromGCS(filename: string): Promise<[import("teeny-request").Response<any>]>;
-    upload(file: any, { path, filename, sizes }: IUploadOptions): Promise<{}>;
+    resizeImage(buffer: Buffer | string, options: SizeOptionsDto): Promise<Buffer>;
+    sendToGCS({ buffer, filename, mimetype, path, }: FileOptionsDto): Promise<string>;
+    removeFileFromGCS({ filename, path }: RemoveFileOptionsDto): Promise<[import("teeny-request").Response<any>]>;
+    resizeImageAndUpload(file: FileOptionsDto, sizes?: SizeOptionsDto[]): Promise<Record<string, string>>;
 }

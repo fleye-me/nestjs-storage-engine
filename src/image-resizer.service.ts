@@ -1,18 +1,20 @@
 import { GOOGLE_CLOUD_CONFIG } from './image-resizer.constants';
 import { GoogleCloudConfig } from './interfaces/google-cloud.interface';
-import { IUploadOptions } from './interfaces/uploadOptions.interface';
+import { SizeOptionsDto } from './interfaces/sizeOptions.dto';
+import { FileOptionsDto } from './interfaces/fileOptions.dto';
 
 import { Injectable, Inject } from '@nestjs/common';
 import { Storage } from '@google-cloud/storage';
 import * as sharp from 'sharp';
+import { RemoveFileOptionsDto } from './interfaces/removeFileOptions.dto';
 
 @Injectable()
 export class ImageResizerService {
   private storage: Storage;
   constructor(
-    @Inject(GOOGLE_CLOUD_CONFIG) private readonly googleCloudConfig: GoogleCloudConfig,
+    @Inject(GOOGLE_CLOUD_CONFIG)
+    private readonly googleCloudConfig: GoogleCloudConfig
   ) {
-
     if (this.googleCloudConfig.keyFilename) {
       this.storage = new Storage({
         projectId: this.googleCloudConfig.projectId,
@@ -21,40 +23,41 @@ export class ImageResizerService {
     } else {
       this.storage = new Storage();
     }
-  
   }
 
-  getHello(): string {
-    return 'Hello World!';
-  }
-
-  async resize(buffer, options: {width?: number, height?: number} = { width: 50, height: 50 }) {
+  async resizeImage(buffer: Buffer | string, options: SizeOptionsDto) {
     return sharp(buffer).resize(options.width, options.height).toBuffer();
   }
 
   // https://cloud.google.com/nodejs/getting-started/using-cloud-storage
-  async sendToGCS(buffer: any, filename: string, mimetype: string) {
+  async sendToGCS({
+    buffer,
+    filename,
+    mimetype,
+    path,
+  }: FileOptionsDto): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
-        const _filename = `${filename}`
-        const bucket = await this.storage.bucket(this.googleCloudConfig.bucket);
+        const _filename = path ? `${path}/${filename}` : filename;
+        const bucket = this.storage.bucket(this.googleCloudConfig.bucket);
         const remoteFile = bucket.file(_filename);
 
         const stream = remoteFile.createWriteStream({
-          metadata: { contentType: mimetype },
-          resumable: false
+          metadata: mimetype ? { contentType: mimetype } : undefined,
+          resumable: false,
         });
 
         stream.on('error', reject);
 
         stream.on('finish', async () => {
           remoteFile.makePublic().then(() => {
-            resolve(`https://storage.googleapis.com/${this.googleCloudConfig.bucket}/${_filename}`);
+            resolve(
+              `https://storage.googleapis.com/${this.googleCloudConfig.bucket}/${_filename}`
+            );
           });
         });
 
         stream.end(buffer);
-
       } catch (err) {
         console.error('Error trying to upload a file');
         console.error(err);
@@ -62,46 +65,45 @@ export class ImageResizerService {
     });
   }
 
-  async removeFromGCS(filename: string) {
+  async removeFileFromGCS({ filename, path }: RemoveFileOptionsDto) {
+    const _filename = path ? `${path}/${filename}` : filename;
     return this.storage
       .bucket(this.googleCloudConfig.bucket)
-      .file(filename)
-      .delete()
+      .file(_filename)
+      .delete();
   }
 
-  async upload(file: any, {path, filename, sizes}: IUploadOptions) {
+  async resizeImageAndUpload(
+    file: FileOptionsDto,
+    sizes: SizeOptionsDto[] = []
+  ): Promise<Record<string, string>> {
     const pendingUploads = [];
-    const imagesUrls = {};
+    const imagesUrls: Record<string, string> = {};
 
-    sizes = sizes ? sizes : [];
-    filename = filename ? filename : file.originalname;
     // Upload original image
-    pendingUploads.push(this.sendToGCS(
-      file.buffer,
-      `${path ? `${path}/` : ''}${filename}`,
-      file.mimetype,
-    ).then(url => imagesUrls['original'] = url));
-
+    pendingUploads.push(
+      this.sendToGCS(file).then((url) => (imagesUrls['original'] = url))
+    );
 
     // Upload small images
     for (const size of sizes) {
-      this.resize(
-        file.buffer,
-        size
-      ).then(resizedImage => {
-        pendingUploads.push(this.sendToGCS(
-          resizedImage,
-          `${path ? `${path}/` : ''}${size.width}_${size.height}_${filename}`,
-          file.mimetype
-        ).then(url => imagesUrls[`${size.width || size.height}x${size.height || size.width}`] = url));
-      }).catch(err => {
+      try {
+        const resizedImage = await this.resizeImage(file.buffer, size);
+
+        pendingUploads.push(
+          this.sendToGCS({
+            ...file,
+            buffer: resizedImage,
+            filename: `${size.width}_${size.height}_${file.filename}`,
+          }).then((url) => (imagesUrls[`w${size.width}h${size.height}`] = url))
+        );
+      } catch (err) {
         console.error('Resize image error');
         console.error(err);
-      })
+      }
     }
 
     await Promise.all(pendingUploads);
     return imagesUrls;
   }
-
 }
