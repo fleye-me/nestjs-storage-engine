@@ -15,13 +15,13 @@ export class LocalStorage implements StorageInterface {
   ) {}
 
   async uploadFile({ filename, path, buffer }: UploadFileDto) {
-    const encodeURIFileName = encodeURIComponent(filename)
+    const customPath = `${path}/${filename}`;
 
     const writeToPath = destination.resolve(this.storageConfig.disk.uploadsFolder, path);
     fs.mkdirSync(writeToPath, { recursive: true });
     fs.writeFileSync(`${writeToPath}/${filename}`, buffer);
 
-    const fileUrl = `${this.storageConfig.disk.serverStaticFilesBaseUrl}/${path}/${encodeURIFileName}`
+    const fileUrl = `${this.storageConfig.disk.serverStaticFilesBaseUrl}/${encodeURIComponent(customPath)}`
 
     return {
       filename,
