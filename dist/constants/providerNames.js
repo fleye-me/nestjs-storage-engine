@@ -1,6 +1,0 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.STORAGE_CONFIG_MODULE_OPTIONS = exports.STORAGE_CONFIG = exports.PROVIDER_ENGINE_NAME = void 0;
-exports.PROVIDER_ENGINE_NAME = '@FLEYE/STORAGE_ENGINE';
-exports.STORAGE_CONFIG = '@FLEYE/STORAGE_CONFIG';
-exports.STORAGE_CONFIG_MODULE_OPTIONS = '@FLEYE/STORAGE_CONFIG_MODULE_OPTIONS';

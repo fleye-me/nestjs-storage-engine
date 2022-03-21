@@ -1,27 +1,41 @@
-# nestjs-image-resizer-upload
-Resize and upload images to google cloud storage
+# @fleye/storage-engine
+- Upload files to Google Cloud Storage or save in to local disk
+- Delete files uploaded
+- Resize and upload images
+- Upload files in different sizes
 
-# install 
+# Install 
 ```bash
-  npm install --save 'nest-image-resizer'
+  npm i '@fleye/storage-engine'
+```
+or
+```bash
+  yarn add '@fleye/storage-engine'
 ```
 
-# setup
+# Setup
 
-## async import 
+## Async import 
 
 YOUR_GOOGLE_CLOUD_CREDENTIALS = path to your google service account file that gives you permission to upload files to a bucket
 ```javascript
 @Module({
   imports: [
-    ImageResizerModule.registerAsync({
+    StorageEngineModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory(config: ConfigService) {
         return {
-          projectId: config.get('YOUR_GOOGLE_CLOUD_PROJECT_ID'),
-          keyFilename: config.get('YOUR_GOOGLE_CLOUD_CREDENTIALS'),
-          bucket: config.get('YOUR_GOOGLE_CLOUD_BUCKET_NAME'),
+          providerEngineName: 'gcp', // gcp or disk
+          disk: { // if you use local disk
+            uploadsFolder: path.resolve(__dirname, '..', 'uploads'),
+            serverStaticFilesBaseUrl: config.get('SERVER_STATIC_FILES_BASE_URL'),
+          },
+          gcp: {  // if you use google cloud storage
+            projectId: config.get('GOOGLE_CLOUD_PROJECT_ID'),
+            credentialsKeyPath: config.get('GOOGLE_CLOUD_CREDENTIALS'),
+            bucket: config.get('GOOGLE_CLOUD_BUCKET'),
+          },
         };
       },
     }),
@@ -31,12 +45,11 @@ YOUR_GOOGLE_CLOUD_CREDENTIALS = path to your google service account file that gi
 
 ## Using the service
 ```javascript
-
-import { ImageResizerService } from 'nest-image-resizer';
+import { StorageEngineService } from '@fleye/google-storage';
 
 export class YourService {
   constructor(
-    private readonly imageResizerService: ImageResizerService,
+    private storageService: StorageEngineService,
   ) {}
 }
 ```
