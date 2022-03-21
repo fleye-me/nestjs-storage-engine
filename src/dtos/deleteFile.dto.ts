@@ -1,4 +1,4 @@
 export class DeleteFileDto {
   filename: string;
-  path: string;
+  path?: string;
 }

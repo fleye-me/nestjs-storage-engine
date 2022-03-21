@@ -6,7 +6,7 @@ import { StorageInterface } from './interfaces/storage.interface';
 import * as crypto from 'crypto';
 import { SizeOptionsDto } from './dtos/sizeOptions.dto';
 import * as sharp from 'sharp';
-import { UploadFileResultsDto } from './dtos/uploadFileResults.dto';
+import { UploadedFileDto } from './dtos/uploadedFile.dto';
 
 @Injectable()
 export class StorageEngineService {
@@ -15,7 +15,7 @@ export class StorageEngineService {
     private storageEngine: StorageInterface
   ) {}
 
-  createUniqueFilename(originalFilename: string) {
+  private createUniqueFilename(originalFilename: string) {
     const hash = crypto.randomBytes(10).toString('hex');
     const arrayFileName = originalFilename.split('.');
     const ext = arrayFileName.pop();
@@ -33,9 +33,9 @@ export class StorageEngineService {
   async resizeImageAndUpload(
     file: UploadFileDto,
     sizes: SizeOptionsDto[] = []
-  ): Promise<Record<string, UploadFileResultsDto>> {
+  ): Promise<Record<string, UploadedFileDto>> {
     const pendingUploads = [];
-    const imagesUrls: Record<string, UploadFileResultsDto> = {};
+    const imagesUrls: Record<string, UploadedFileDto> = {};
 
     // Upload original image
     pendingUploads.push(
@@ -66,11 +66,17 @@ export class StorageEngineService {
     return imagesUrls;
   }
 
-  async uploadFile(data: UploadFileDto) {
-    return this.storageEngine.uploadFile({
+  async uploadFile(data: UploadFileDto): Promise<UploadedFileDto> {
+    const results = await this.storageEngine.uploadFile({
       ...data,
       filename: this.createUniqueFilename(data.filename)
     });
+
+    return {
+      ...results,
+      originalFilename: data.filename,
+      path: data.path
+    }
   }
 
   async deleteFile(data: DeleteFileDto) {
