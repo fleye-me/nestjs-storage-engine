@@ -1,2 +1,2 @@
-export * from './image-resizer.module';
-export * from './image-resizer.service';
+export * from './storage.module';
+export * from './storage.service';

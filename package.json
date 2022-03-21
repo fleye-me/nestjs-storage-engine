@@ -1,8 +1,8 @@
 {
-  "name": "nest-image-resizer",
-  "version": "0.0.8",
+  "name": "@fleye/storage-engine",
+  "version": "0.0.9",
   "main": "dist/index.js",
-  "repository": "git://github.com/sthima/nestjs-image-resizer-upload.git",
+  "repository": "git://github.com/fleye-me/storage-engine.git",
   "scripts": {
     "build": "tsc -p tsconfig.lib.json"
   },

@@ -1,12 +1,12 @@
 import { Provider } from '@nestjs/common';
 import { ModuleMetadata } from '@nestjs/common/interfaces';
-import { GoogleCloudConfig } from './google-cloud.interface';
+import { StorageConfigDto } from '../dtos/storageConfig.dto';
 
-export interface ImageResizerModuleAsyncOptions
+export interface StorageConfigAsyncOptions
   extends Pick<ModuleMetadata, 'imports'> {
   useFactory?: (
     ...args: any[]
-  ) => Promise<GoogleCloudConfig> | GoogleCloudConfig;
+  ) => Promise<StorageConfigDto> | StorageConfigDto;
   inject?: any[];
   extraProviders?: Provider[];
 }
