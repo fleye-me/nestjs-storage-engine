@@ -2,19 +2,17 @@
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
+    "noImplicitAny": false,
     "removeComments": true,
+    "noLib": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "target": "es2017",
-    "sourceMap": true,
+    "sourceMap": false,
     "outDir": "./dist",
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["*"]
-    },
-    "incremental": true,
-    "resolveJsonModule": true
+    "rootDir": "./src",
+    "skipLibCheck": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "uploads"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "test", "**/*spec.ts"]
 }
