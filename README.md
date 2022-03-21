@@ -45,7 +45,7 @@ YOUR_GOOGLE_CLOUD_CREDENTIALS = path to your google service account file that gi
 
 ## Using the service
 ```javascript
-import { StorageEngineService } from '@fleye-me/google-storage';
+import { StorageEngineService } from '@fleye-me/storage-engine';
 
 export class YourService {
   constructor(

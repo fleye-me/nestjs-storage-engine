@@ -22,6 +22,18 @@ jobs:
       - name: Build project
         run: yarn build
 
-      - run: yarn publish
+      - name: Publish to github packages
+        run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@fleye-me'
+
+      - name: Publish to npm repository
+        run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
