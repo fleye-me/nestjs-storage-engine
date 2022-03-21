@@ -1,15 +1,15 @@
 {
-  "name": "@fleye-me/storage-engine",
+  "name": "@fleye-me/nestjs-storage-engine",
   "version": "0.1.6",
   "description": "Upload files to Google Cloud Storage or save in to local disk",
   "main": "dist/index.js",
-  "repository": "git://github.com/fleye-me/storage-engine.git",
+  "repository": "git://github.com/fleye-me/nestjs-storage-engine.git",
   "scripts": {
     "build": "tsc -p tsconfig.lib.json"
   },
   "peerDependencies": {
-    "@nestjs/common": "^6.0.0",
-    "@nestjs/core": "^6.0.0"
+    "@nestjs/common": "^8.4.1",
+    "@nestjs/core": "^8.4.1"
   },
   "devDependencies": {
     "@nestjs/common": "^8.4.1",

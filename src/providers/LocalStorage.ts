@@ -12,7 +12,9 @@ export class LocalStorage implements StorageInterface {
   constructor(
     @Inject(STORAGE_CONFIG)
     private storageConfig: StorageConfigDto
-  ) {}
+  ) {
+    fs.mkdirSync(storageConfig.disk.uploadsFolder, { recursive: true });
+  }
 
   async uploadFile({ filename, path, buffer }: UploadFileDto) {
     const customPath = `${path}/${filename}`;
