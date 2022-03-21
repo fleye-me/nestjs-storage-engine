@@ -4,9 +4,6 @@
   "description": "Upload files to Google Cloud Storage or save in to local disk",
   "main": "dist/index.js",
   "repository": "git://github.com/fleye-me/storage-engine.git",
-  "publishConfig": {
-    "registry":"https://npm.pkg.github.com"
-  },
   "scripts": {
     "build": "tsc -p tsconfig.lib.json"
   },
