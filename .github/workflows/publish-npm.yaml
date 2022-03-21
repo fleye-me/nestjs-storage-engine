@@ -1,0 +1,25 @@
+name: Publish Package to npmjs
+on:
+  push:
+    branches: [main, refactor/node-v16]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          cache: 'yarn'
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@fleye-me'
+
+      - run: yarn
+
+      - name: Build project
+        run: yarn build
+
+      - run: yarn publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
