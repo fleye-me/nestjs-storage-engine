@@ -1,4 +1,4 @@
-# @fleye/storage-engine
+# @fleye-me/storage-engine
 - Upload files to Google Cloud Storage or save in to local disk
 - Delete files uploaded
 - Resize and upload images
@@ -6,11 +6,11 @@
 
 # Install 
 ```bash
-  npm i '@fleye/storage-engine'
+  npm i '@fleye-me/storage-engine'
 ```
 or
 ```bash
-  yarn add '@fleye/storage-engine'
+  yarn add '@fleye-me/storage-engine'
 ```
 
 # Setup
@@ -45,7 +45,7 @@ YOUR_GOOGLE_CLOUD_CREDENTIALS = path to your google service account file that gi
 
 ## Using the service
 ```javascript
-import { StorageEngineService } from '@fleye/google-storage';
+import { StorageEngineService } from '@fleye-me/google-storage';
 
 export class YourService {
   constructor(
