@@ -1,27 +1,37 @@
-# nestjs-image-resizer-upload
-Resize and upload images to google cloud storage
+# @fleye-me/nestjs-storage-engine
+- Upload files to Google Cloud Storage or save in to local disk
+- Delete files uploaded
+- Resize and upload images
+- Upload files in different sizes
 
-# install 
+# Install 
 ```bash
-  npm install --save 'nest-image-resizer'
+npm i @fleye-me/nestjs-storage-engine
+```
+or
+```bash
+yarn add @fleye-me/nestjs-storage-engine
 ```
 
-# setup
+# Setup
 
-## async import 
+## Async import using Google Cloud Storage config
 
-YOUR_GOOGLE_CLOUD_CREDENTIALS = path to your google service account file that gives you permission to upload files to a bucket
+`Update app.module.ts with:`
 ```javascript
 @Module({
   imports: [
-    ImageResizerModule.registerAsync({
+    StorageEngineModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory(config: ConfigService) {
         return {
-          projectId: config.get('YOUR_GOOGLE_CLOUD_PROJECT_ID'),
-          keyFilename: config.get('YOUR_GOOGLE_CLOUD_CREDENTIALS'),
-          bucket: config.get('YOUR_GOOGLE_CLOUD_BUCKET_NAME'),
+          providerEngineName: 'gcp',
+          gcp: {
+            projectId: config.get('GOOGLE_CLOUD_PROJECT_ID'),
+            credentialsKeyPath: config.get('GOOGLE_CLOUD_CREDENTIALS'),
+            bucket: config.get('GOOGLE_CLOUD_BUCKET'),
+          },
         };
       },
     }),
@@ -29,14 +39,65 @@ YOUR_GOOGLE_CLOUD_CREDENTIALS = path to your google service account file that gi
 })
 ```
 
+YOUR_GOOGLE_CLOUD_CREDENTIALS = path to your google service account file that gives you permission to upload files to a bucket
+
+`Update .env with:`
+```javascript
+# Storage engine
+STORAGE_ENGINE=gcp # disk or gcp
+
+# Google Cloud
+GOOGLE_CLOUD_BUCKET=
+GOOGLE_CLOUD_PROJECT_ID=
+GOOGLE_CLOUD_CREDENTIALS=
+```
+
+## Async import using Local Disk config
+
+`Update app.module.ts with:`
+```javascript
+@Module({
+  imports: [
+    StorageEngineModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory(config: ConfigService) {
+        return {
+          providerEngineName: 'disk',
+          disk: {
+            uploadsFolder: path.resolve(__dirname, '..', 'uploads'), // path to save files
+            serverStaticFilesBaseUrl: config.get('SERVER_STATIC_FILES_BASE_URL'),
+          }
+        };
+      },
+    }),
+  ],
+})
+```
+
+`Update main.ts with:`
+```javascript
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.useStaticAssets(path.join(__dirname, '..', 'uploads'), {
+    prefix: '/static/',
+  });
+```
+
+`Update .env with:`
+```javascript
+# Storage engine
+STORAGE_ENGINE=disk # disk or gcp
+SERVER_STATIC_FILES_BASE_URL=http://localhost:8080/static
+```
+
 ## Using the service
 ```javascript
-
-import { ImageResizerService } from 'nest-image-resizer';
+import { StorageEngineService } from '@fleye-me/nestjs-storage-engine';
 
 export class YourService {
   constructor(
-    private readonly imageResizerService: ImageResizerService,
+    private storageService: StorageEngineService,
   ) {}
 }
 ```
