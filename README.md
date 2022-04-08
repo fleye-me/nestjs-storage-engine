@@ -14,7 +14,7 @@ Provides file uploads with the Google Cloud Store or conveniently locally to Nes
 - Resize and upload images
 - Upload files in different sizes
 
-# Indice
+# Index
 
 - [Installation](#Installation)
 - [Getting Started](#Getting-Started)
