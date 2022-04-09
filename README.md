@@ -192,7 +192,7 @@ async resizeImage(
   buffer: Buffer | string,
   ) {
 
-    const fileResults = await this.storageService.resizeImage(resizeImage(
+    const fileResults = await this.storageService.resizeImage(
         {
           buffer: image,
         },
