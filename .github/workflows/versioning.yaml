@@ -1,0 +1,67 @@
+name: Release Stage Version on Stage Branch
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+  push:
+    branches: [main]
+
+jobs:
+  version-on-pull:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: 'Checkout to base branch'
+        uses: actions/checkout@master
+        with:
+          ref: github.event.pull_request.base.ref
+
+      - name: Configure git user
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git config --local user.password "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Update app version to major
+        if: contains(github.event.pull_request.labels.*.name, 'major') && !contains(github.event.pull_request.labels.*.name, 'minor') && !contains(github.event.pull_request.labels.*.name, 'patch')
+        id: major
+        run: npm version major -m 'Upgrade to %s'
+
+      - name: Update app version to minor
+        if: contains(github.event.pull_request.labels.*.name, 'minor') && !contains(github.event.pull_request.labels.*.name, 'major') && !contains(github.event.pull_request.labels.*.name, 'patch')
+        id: minor
+        run: npm version minor -m 'Upgrade to %s'
+
+      - name: Update app version to patch
+        if: steps.major.outcome != 'success' && steps.minor.outcome != 'success'
+        run: npm version patch -m 'Upgrade to %s'
+
+      - name: Update branch
+        run: git push
+
+      - name: Send tags
+        run: git push --tags
+
+  version-on-push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@master
+
+      - name: Configure git user
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git config --local user.password "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Update app version to patch
+        if: steps.major.outcome != 'success' && steps.minor.outcome != 'success'
+        run: npm version patch -m 'Upgrade to %s'
+
+      - name: Update branch
+        run: git push
+
+      - name: Send tags
+        run: git push --tags
