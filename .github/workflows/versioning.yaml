@@ -1,4 +1,4 @@
-name: Release Stage Version on Stage Branch
+name: Release Version
 
 on:
   pull_request:
