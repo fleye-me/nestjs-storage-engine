@@ -15,7 +15,7 @@ jobs:
       - name: 'Checkout to base branch'
         uses: actions/checkout@master
         with:
-          ref: github.event.pull_request.base.ref
+          ref: ${{ github.event.pull_request.base.ref }}
 
       - name: Configure git user
         run: |
@@ -45,7 +45,7 @@ jobs:
 
   version-on-push:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && !startsWith(github.event.head_commit.message, 'Merge pull request')
     steps:
       - name: 'Checkout'
         uses: actions/checkout@master
