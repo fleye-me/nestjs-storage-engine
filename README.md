@@ -51,7 +51,7 @@ import { StorageEngineModule } from '@fleye-me/nestjs-storage-engine';
       inject: [ConfigService],
       useFactory(config: ConfigService) {
         return {
-          providerEngineName: 'gcp',
+          providerEngineName: config.get('STORAGE_ENGINE'),
           gcp: {
             projectId: config.get('GOOGLE_CLOUD_PROJECT_ID'),
             credentialsKeyPath: config.get('GOOGLE_CLOUD_CREDENTIALS'),
