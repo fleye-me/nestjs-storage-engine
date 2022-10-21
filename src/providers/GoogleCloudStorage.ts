@@ -35,7 +35,8 @@ export class GoogleCloudStorage implements StorageInterface {
   }: UploadFileDto): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
-        const _filename = path ? `${path}/${filename}` : filename;
+        const encodedFilename = encodeURIComponent(filename);
+        const _filename = path ? `${path}/${encodedFilename}` : encodedFilename;
         const bucket = this.storage.bucket(this.googleCloudConfig.bucket);
         const remoteFile = bucket.file(_filename);
 
@@ -49,9 +50,7 @@ export class GoogleCloudStorage implements StorageInterface {
         stream.on("finish", async () => {
           remoteFile.makePublic().then(() => {
             resolve(
-              `https://storage.googleapis.com/${
-                this.googleCloudConfig.bucket
-              }/${encodeURIComponent(_filename)}`
+              `https://storage.googleapis.com/${this.googleCloudConfig.bucket}/${_filename}`
             );
           });
         });
