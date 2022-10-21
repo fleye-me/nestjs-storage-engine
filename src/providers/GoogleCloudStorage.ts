@@ -51,7 +51,7 @@ export class GoogleCloudStorage implements StorageInterface {
             resolve(
               `https://storage.googleapis.com/${
                 this.googleCloudConfig.bucket
-              }/${encodeURI(_filename)}`
+              }/${encodeURIComponent(_filename)}`
             );
           });
         });
