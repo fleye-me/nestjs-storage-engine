@@ -1,11 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { STORAGE_CONFIG } from '../constants/providerNames';
-import { GoogleCloudConfigDto } from '../dtos/googleCloudConfig.dto';
-import { StorageInterface } from '../interfaces/storage.interface';
-import { Storage } from '@google-cloud/storage';
-import { UploadFileDto } from '../dtos/uploadFile.dto';
-import { DeleteFileDto } from '../dtos/deleteFile.dto';
-import { StorageConfigDto } from '../dtos/storageConfig.dto';
+import { Inject, Injectable } from "@nestjs/common";
+import { STORAGE_CONFIG } from "../constants/providerNames";
+import { GoogleCloudConfigDto } from "../dtos/googleCloudConfig.dto";
+import { StorageInterface } from "../interfaces/storage.interface";
+import { Storage } from "@google-cloud/storage";
+import { UploadFileDto } from "../dtos/uploadFile.dto";
+import { DeleteFileDto } from "../dtos/deleteFile.dto";
+import { StorageConfigDto } from "../dtos/storageConfig.dto";
 
 @Injectable()
 export class GoogleCloudStorage implements StorageInterface {
@@ -15,8 +15,8 @@ export class GoogleCloudStorage implements StorageInterface {
     @Inject(STORAGE_CONFIG)
     private readonly storageConfig: StorageConfigDto
   ) {
-    this.googleCloudConfig = this.storageConfig.gcp
-    
+    this.googleCloudConfig = this.storageConfig.gcp;
+
     if (this.googleCloudConfig.credentialsKeyPath) {
       this.storage = new Storage({
         projectId: this.googleCloudConfig.projectId,
@@ -35,7 +35,8 @@ export class GoogleCloudStorage implements StorageInterface {
   }: UploadFileDto): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
-        const _filename = path ? `${path}/${filename}` : filename;
+        const encodedFilename = encodeURIComponent(filename);
+        const _filename = path ? `${path}/${encodedFilename}` : encodedFilename;
         const bucket = this.storage.bucket(this.googleCloudConfig.bucket);
         const remoteFile = bucket.file(_filename);
 
@@ -44,9 +45,9 @@ export class GoogleCloudStorage implements StorageInterface {
           resumable: false,
         });
 
-        stream.on('error', reject);
+        stream.on("error", reject);
 
-        stream.on('finish', async () => {
+        stream.on("finish", async () => {
           remoteFile.makePublic().then(() => {
             resolve(
               `https://storage.googleapis.com/${this.googleCloudConfig.bucket}/${_filename}`
@@ -56,7 +57,7 @@ export class GoogleCloudStorage implements StorageInterface {
 
         stream.end(buffer);
       } catch (err) {
-        console.error('Error trying to upload a file');
+        console.error("Error trying to upload a file");
         console.error(err);
       }
     });
