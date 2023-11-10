@@ -27,6 +27,20 @@ export class GoogleCloudStorage implements StorageInterface {
     }
   }
 
+  private buildFilePaths({
+    filename,
+    path,
+  }: Pick<UploadFileDto, "filename" | "path">) {
+    const filePath = path ? `${path}/${filename}` : filename;
+
+    const encodedFileName = encodeURIComponent(filename);
+    const encodedFilePath = path
+      ? `${path}/${encodedFileName}`
+      : encodedFileName;
+
+    return { filePath, encodedFilePath };
+  }
+
   async sendToGCS({
     buffer,
     filename,
@@ -35,10 +49,14 @@ export class GoogleCloudStorage implements StorageInterface {
   }: UploadFileDto): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
-        const encodedFilename = encodeURIComponent(filename);
-        const _filename = path ? `${path}/${encodedFilename}` : encodedFilename;
+        const { filePath, encodedFilePath } = this.buildFilePaths({
+          filename,
+          path,
+        });
+
+        // We can't encode the file path since GCP already does it.
         const bucket = this.storage.bucket(this.googleCloudConfig.bucket);
-        const remoteFile = bucket.file(_filename);
+        const remoteFile = bucket.file(filePath);
 
         const stream = remoteFile.createWriteStream({
           metadata: mimeType ? { contentType: mimeType } : undefined,
@@ -49,8 +67,9 @@ export class GoogleCloudStorage implements StorageInterface {
 
         stream.on("finish", async () => {
           remoteFile.makePublic().then(() => {
+            // We then resolve an encoded file path, doing the same as GCP does.
             resolve(
-              `https://storage.googleapis.com/${this.googleCloudConfig.bucket}/${_filename}`
+              `https://storage.googleapis.com/${this.googleCloudConfig.bucket}/${encodedFilePath}`
             );
           });
         });
